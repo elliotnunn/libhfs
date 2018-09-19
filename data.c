@@ -428,8 +428,6 @@ int d_relstring(const char *str1, const char *str2)
 static
 void calctzdiff(void)
 {
-# ifdef HAVE_MKTIME
-
   time_t t;
   int isdst;
   struct tm tm;
@@ -448,12 +446,6 @@ void calctzdiff(void)
     }
   else
     tzdiff = 0;
-
-# else
-
-  tzdiff = 0;
-
-# endif
 }
 
 /*
