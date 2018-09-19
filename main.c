@@ -26,7 +26,7 @@ static PyObject *wrap_mount(PyObject *self, PyObject *args)
         {PyErr_SetString(PyExc_ValueError, "bad args"); return NULL;}
     hfsvol *ret = hfs_mount(arg_path, arg_pnum, arg_flags);
     if(!ret)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
    return PyCapsule_New((void *)ret, NAME_HFSVOL, NULL);
 }
 
@@ -39,7 +39,7 @@ static PyObject *wrap_flush(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_flush(arg_vol))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -58,7 +58,7 @@ static PyObject *wrap_umount(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_umount(arg_vol))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -75,7 +75,7 @@ static PyObject *wrap_getvol(PyObject *self, PyObject *args)
         {PyErr_SetString(PyExc_ValueError, "bad args"); return NULL;}
     hfsvol *ret = hfs_getvol(arg_vol);
     if(!ret)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return PyCapsule_New((void *)ret, NAME_HFSVOL, NULL);
 }
 
@@ -101,7 +101,7 @@ static PyObject *wrap_vstat(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_vstat(arg_vol, &ret_volent))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("y#", (char *)(&ret_volent), sizeof(ret_volent));
 }
 
@@ -116,7 +116,7 @@ static PyObject *wrap_vsetattr(PyObject *self, PyObject *args) // problems
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_vsetattr(arg_vol, arg_ent))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -129,7 +129,7 @@ static PyObject *wrap_chdir(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_chdir(arg_vol, arg_path))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -153,7 +153,7 @@ static PyObject *wrap_setcwd(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_setcwd(arg_vol, arg_id))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -167,7 +167,7 @@ static PyObject *wrap_dirinfo(PyObject *self, PyObject *args) // returns name in
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_dirinfo(arg_vol, &argret_id, ret_name))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("ly", argret_id, ret_name);
 }
 
@@ -181,7 +181,7 @@ static PyObject *wrap_opendir(PyObject *self, PyObject *args)
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     hfsdir *ret = hfs_opendir(arg_vol, arg_path);
     if(!ret)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return PyCapsule_New((void *)ret, NAME_HFSDIR, NULL);
 }
 
@@ -195,7 +195,7 @@ static PyObject *wrap_readdir(PyObject *self, PyObject *args)
     else if(!(arg_dir = PyCapsule_GetPointer(arg_dir_c, NAME_HFSDIR)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSDIR); return NULL;}
     if(hfs_readdir(arg_dir, &ret_ent))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("y#", (char *)(&ret_ent), sizeof(ret_ent));
 }
 
@@ -208,7 +208,7 @@ static PyObject *wrap_closedir(PyObject *self, PyObject *args)
     else if(!(arg_dir = PyCapsule_GetPointer(arg_dir_c, NAME_HFSDIR)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSDIR); return NULL;}
     if(hfs_closedir(arg_dir))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -226,7 +226,7 @@ static PyObject *wrap_create(PyObject *self, PyObject *args)
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     hfsfile *ret = hfs_create(arg_vol, arg_path, arg_type, arg_creator);
     if(!ret)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return PyCapsule_New((void *)ret, NAME_HFSFILE, NULL);
 }
 
@@ -240,7 +240,7 @@ static PyObject *wrap_open(PyObject *self, PyObject *args)
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     hfsfile *ret = hfs_open(arg_vol, arg_path);
     if(!ret)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return PyCapsule_New((void *)ret, NAME_HFSFILE, NULL);
 }
 
@@ -253,7 +253,7 @@ static PyObject *wrap_setfork(PyObject *self, PyObject *args)
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSFILE); return NULL;}
     if(hfs_setfork(arg_file, arg_fork))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -278,7 +278,7 @@ static PyObject *wrap_read(PyObject *self, PyObject *args) // pass in a bytearra
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSFILE); return NULL;}
     long bytesread = hfs_read(arg_file, PyByteArray_AsString(arg_bytearray), PyByteArray_Size(arg_bytearray));
     if(bytesread == -1)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     PyByteArray_Resize(arg_bytearray, bytesread);
     return Py_None;
 }
@@ -293,7 +293,7 @@ static PyObject *wrap_write(PyObject *self, PyObject *args) // pass in a bytearr
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSFILE); return NULL;}
     long byteswritten = hfs_write(arg_file, arg_bytes, arg_bytes_len);
     if(byteswritten == -1)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("l", byteswritten);
 }
 
@@ -306,7 +306,7 @@ static PyObject *wrap_truncate(PyObject *self, PyObject *args) // pass in a byte
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSFILE); return NULL;}
     if(hfs_truncate(arg_file, arg_len))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -320,7 +320,7 @@ static PyObject *wrap_seek(PyObject *self, PyObject *args) // pass in a bytearra
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSFILE); return NULL;}
     long absloc = hfs_seek(arg_file, arg_offset, arg_from);
     if(absloc == -1)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("l", absloc);
 }
 
@@ -333,7 +333,7 @@ static PyObject *wrap_close(PyObject *self, PyObject *args) // pass in a bytearr
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSFILE); return NULL;}
     if(hfs_close(arg_file))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -347,7 +347,7 @@ static PyObject *wrap_stat(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_stat(arg_vol, arg_path, &ret_ent))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("y#", (char *)(&ret_ent), sizeof(ret_ent));
 }
 
@@ -361,7 +361,7 @@ static PyObject *wrap_fstat(PyObject *self, PyObject *args)
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSFILE); return NULL;}
     if(hfs_fstat(arg_file, &ret_ent))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("y#", (char *)(&ret_ent), sizeof(ret_ent));
 }
 
@@ -376,7 +376,7 @@ static PyObject *wrap_setattr(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_setattr(arg_vol, arg_path, arg_ent))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -391,7 +391,7 @@ static PyObject *wrap_fsetattr(PyObject *self, PyObject *args)
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSFILE); return NULL;}
     if(hfs_fsetattr(arg_file, arg_ent))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -404,7 +404,7 @@ static PyObject *wrap_mkdir(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_mkdir(arg_vol, arg_path))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -417,7 +417,7 @@ static PyObject *wrap_rmdir(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_rmdir(arg_vol, arg_path))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -430,7 +430,7 @@ static PyObject *wrap_delete(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_delete(arg_vol, arg_path))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -443,7 +443,7 @@ static PyObject *wrap_rename(PyObject *self, PyObject *args)
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSVOL); return NULL;}
     if(hfs_rename(arg_vol, arg_srcpath, arg_dstpath))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -454,7 +454,7 @@ static PyObject *wrap_zero(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "sI", &arg_path, &arg_maxparts))
         {PyErr_SetString(PyExc_ValueError, "bad args"); return NULL;}
     if(hfs_zero(arg_path, arg_maxparts, &ret_blocks))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("k", ret_blocks);
 }
 
@@ -464,7 +464,7 @@ static PyObject *wrap_mkpart(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "sk", &arg_path, &arg_len))
         {PyErr_SetString(PyExc_ValueError, "bad args"); return NULL;}
     if(hfs_mkpart(arg_path, arg_len))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
@@ -476,7 +476,7 @@ static PyObject *wrap_nparts(PyObject *self, PyObject *args)
         {PyErr_SetString(PyExc_ValueError, "bad args"); return NULL;}
     ret = hfs_nparts(arg_path);
     if(ret == -1)
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_BuildValue("i", ret);
 }
 
@@ -486,7 +486,7 @@ static PyObject *wrap_format(PyObject *self, PyObject *args) // bad blocks unimp
     if(!PyArg_ParseTuple(args, "siiy", &arg_path, &arg_pnum, &arg_mode, &arg_vname))
         {PyErr_SetString(PyExc_ValueError, "bad args"); return NULL;}
     if(hfs_format(arg_path, arg_pnum, arg_mode, arg_vname, 0, NULL))
-        {PyErr_SetString(PyExc_ValueError, "call failed"); return NULL;}
+        {PyErr_SetString(PyExc_ValueError, hfs_error); return NULL;}
     return Py_None;
 }
 
