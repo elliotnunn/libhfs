@@ -1,5 +1,5 @@
 /*
- * hfsutils - tools for reading and writing Macintosh HFS volumes
+ * libhfs - library for reading and writing Macintosh HFS volumes
  * Copyright (C) 1996-1998 Robert Leslie
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: acconfig.h,v 1.5 1998/04/11 08:26:53 rob Exp $
+ * $Id: acconfig.h,v 1.5 1998/04/11 08:27:11 rob Exp $
  */
 
 /*****************************************************************************
@@ -27,27 +27,12 @@
 /* Define if you want to enable diagnostic debugging support. */
 #undef DEBUG
 
-/* Define if your system has sys_errlist[] and sys_nerr. */
-#undef HAVE_SYS_ERRLIST
-
 @BOTTOM@
 
 /*****************************************************************************
  * End of automatically configured definitions                               *
  *****************************************************************************/
 
-# ifndef HAVE_STRDUP
-char *strdup(const char *);
-# endif
-
-# ifndef HAVE_STRERROR
-char *strerror(int);
-# endif
-
-# ifndef HAVE_STRSTR
-char *strstr(const char *, const char *);
-# endif
-
-# ifndef HAVE_STRTOL
-long strtol(const char *, char **, int);
+# ifdef DEBUG
+#  include <stdio.h>
 # endif

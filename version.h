@@ -1,5 +1,5 @@
 /*
- * hfsutils - tools for reading and writing Macintosh HFS volumes
+ * libhfs - library for reading and writing Macintosh HFS volumes
  * Copyright (C) 1996-1998 Robert Leslie
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,13 +16,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- * $Id: version.h,v 1.10 1998/09/18 22:56:27 rob Exp $
+ * $Id: version.h,v 1.6 1998/09/18 22:56:38 rob Exp $
  */
 
-extern const char hfsutils_rcsid[];
+extern const char libhfs_rcsid[];
 
-extern const char hfsutils_version[];
-extern const char hfsutils_copyright[];
-extern const char hfsutils_author[];
-
-extern const char hfsutils_license[];
+extern const char libhfs_version[];
+extern const char libhfs_copyright[];
+extern const char libhfs_author[];
