@@ -36,7 +36,7 @@ static PyObject *wrap_flush(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-static PyObject *wrap_flushall(PyObject *self)
+static PyObject *wrap_flushall(PyObject *self, PyObject *args)
 {
     hfs_flushall();
     return Py_None;
@@ -52,7 +52,7 @@ static PyObject *wrap_umount(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-static PyObject *wrap_umountall(PyObject *self)
+static PyObject *wrap_umountall(PyObject *self, PyObject *args)
 {
     hfs_umountall();
     return Py_None;
@@ -128,9 +128,9 @@ static PyObject *wrap_setcwd(PyObject *self, PyObject *args)
 
 static PyObject *wrap_dirinfo(PyObject *self, PyObject *args) // returns name in bytes object!
 {
-    hfsvol *arg_vol; PyObject *arg_vol_c; long argret_id;
-    long ret_id; char ret_name[32];
-    if(!PyArg_ParseTuple(args, "Ol", &arg_vol_c, &argret_id)) return NULL;
+    hfsvol *arg_vol; PyObject *arg_vol_c; unsigned long argret_id;
+    char ret_name[32];
+    if(!PyArg_ParseTuple(args, "Ok", &arg_vol_c, &argret_id)) return NULL;
     if(arg_vol_c == Py_None) arg_vol = NULL;
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL))) return NULL;
     if(hfs_dirinfo(arg_vol, &argret_id, ret_name)) return NULL;
@@ -140,7 +140,6 @@ static PyObject *wrap_dirinfo(PyObject *self, PyObject *args) // returns name in
 static PyObject *wrap_opendir(PyObject *self, PyObject *args)
 {
     hfsvol *arg_vol; PyObject *arg_vol_c; char *arg_path;
-    hfsdir *ret_dir;
     if(!PyArg_ParseTuple(args, "Oy", &arg_vol_c, &arg_path)) return NULL;
     if(arg_vol_c == Py_None) arg_vol = NULL;
     else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL))) return NULL;
@@ -149,18 +148,18 @@ static PyObject *wrap_opendir(PyObject *self, PyObject *args)
 
 static PyObject *wrap_readdir(PyObject *self, PyObject *args)
 {
-    hfsvol *arg_dir; PyObject *arg_dir_c;
+    hfsdir *arg_dir; PyObject *arg_dir_c;
     hfsdirent ret_ent;
     if(!PyArg_ParseTuple(args, "O", &arg_dir_c)) return NULL;
     if(arg_dir_c == Py_None) arg_dir = NULL;
     else if(!(arg_dir = PyCapsule_GetPointer(arg_dir_c, NAME_HFSDIR))) return NULL;
-    if(hfs_readdir(arg_dir, &ret_dirent)) return NULL;
-    return Py_BuildValue("y#", (char *)(&ret_dirent), sizeof(ret_dirent));
+    if(hfs_readdir(arg_dir, &ret_ent)) return NULL;
+    return Py_BuildValue("y#", (char *)(&ret_ent), sizeof(ret_ent));
 }
 
 static PyObject *wrap_closedir(PyObject *self, PyObject *args)
 {
-    hfsvol *arg_dir; PyObject *arg_dir_c;
+    hfsdir *arg_dir; PyObject *arg_dir_c;
     if(!PyArg_ParseTuple(args, "O", &arg_dir_c)) return NULL;
     if(arg_dir_c == Py_None) arg_dir = NULL;
     else if(!(arg_dir = PyCapsule_GetPointer(arg_dir_c, NAME_HFSDIR))) return NULL;
@@ -191,7 +190,7 @@ static PyObject *wrap_open(PyObject *self, PyObject *args)
 
 static PyObject *wrap_setfork(PyObject *self, PyObject *args)
 {
-    hfsvol *arg_file; PyObject *arg_file_c; int arg_fork;
+    hfsfile *arg_file; PyObject *arg_file_c; int arg_fork;
     if(!PyArg_ParseTuple(args, "Oi", &arg_file_c, &arg_fork)) return NULL;
     if(arg_file_c == Py_None) arg_file = NULL;
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
@@ -201,8 +200,8 @@ static PyObject *wrap_setfork(PyObject *self, PyObject *args)
 
 static PyObject *wrap_getfork(PyObject *self, PyObject *args)
 {
-    hfsvol *arg_file; PyObject *arg_file_c;
-    if(!PyArg_ParseTuple(args, "O", &arg_file_c, &arg_fork)) return NULL;
+    hfsfile *arg_file; PyObject *arg_file_c;
+    if(!PyArg_ParseTuple(args, "O", &arg_file_c)) return NULL;
     if(arg_file_c == Py_None) arg_file = NULL;
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
     return Py_BuildValue("i", hfs_getfork(arg_file));
@@ -210,7 +209,7 @@ static PyObject *wrap_getfork(PyObject *self, PyObject *args)
 
 static PyObject *wrap_read(PyObject *self, PyObject *args) // pass in a bytearray and get it shrunk!
 {
-    hfsvol *arg_file; PyObject *arg_file_c; PyObject *arg_bytearray;
+    hfsfile *arg_file; PyObject *arg_file_c; PyObject *arg_bytearray;
     if(!PyArg_ParseTuple(args, "OY", &arg_file_c, &arg_bytearray)) return NULL;
     if(arg_file_c == Py_None) arg_file = NULL;
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
@@ -222,7 +221,7 @@ static PyObject *wrap_read(PyObject *self, PyObject *args) // pass in a bytearra
 
 static PyObject *wrap_write(PyObject *self, PyObject *args) // pass in a bytearray and get it shrunk!
 {
-    hfsvol *arg_file; PyObject *arg_file_c; PyObject *arg_bytes; Py_ssize_t arg_bytes_len;
+    hfsfile *arg_file; PyObject *arg_file_c; PyObject *arg_bytes; Py_ssize_t arg_bytes_len;
     if(!PyArg_ParseTuple(args, "Oy#", &arg_file_c, &arg_bytes, &arg_bytes_len)) return NULL;
     if(arg_file_c == Py_None) arg_file = NULL;
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
@@ -233,7 +232,7 @@ static PyObject *wrap_write(PyObject *self, PyObject *args) // pass in a bytearr
 
 static PyObject *wrap_truncate(PyObject *self, PyObject *args) // pass in a bytearray and get it shrunk!
 {
-    hfsvol *arg_file; PyObject *arg_file_c; unsigned long *arg_len;
+    hfsfile *arg_file; PyObject *arg_file_c; unsigned long arg_len;
     if(!PyArg_ParseTuple(args, "Ok", &arg_file_c, &arg_len)) return NULL;
     if(arg_file_c == Py_None) arg_file = NULL;
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
@@ -243,7 +242,7 @@ static PyObject *wrap_truncate(PyObject *self, PyObject *args) // pass in a byte
 
 static PyObject *wrap_seek(PyObject *self, PyObject *args) // pass in a bytearray and get it shrunk!
 {
-    hfsvol *arg_file; PyObject *arg_file_c; long *arg_offset; int arg_from;
+    hfsfile *arg_file; PyObject *arg_file_c; long arg_offset; int arg_from;
     if(!PyArg_ParseTuple(args, "Oli", &arg_file_c, &arg_offset, &arg_from)) return NULL;
     if(arg_file_c == Py_None) arg_file = NULL;
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
@@ -254,14 +253,132 @@ static PyObject *wrap_seek(PyObject *self, PyObject *args) // pass in a bytearra
 
 static PyObject *wrap_close(PyObject *self, PyObject *args) // pass in a bytearray and get it shrunk!
 {
-    hfsvol *arg_file; PyObject *arg_file_c;
-    if(!PyArg_ParseTuple(args, "O", &arg_file_c, &arg_offset, &arg_from)) return NULL;
+    hfsfile *arg_file; PyObject *arg_file_c;
+    if(!PyArg_ParseTuple(args, "O", &arg_file_c)) return NULL;
     if(arg_file_c == Py_None) arg_file = NULL;
     else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
-    if(hfs_close(arg_file, arg_offset, arg_from)) return NULL;
+    if(hfs_close(arg_file)) return NULL;
     return Py_None;
 }
 
+static PyObject *wrap_stat(PyObject *self, PyObject *args)
+{
+    hfsvol *arg_vol; PyObject *arg_vol_c; char *arg_path;
+    hfsdirent ret_ent;
+    if(!PyArg_ParseTuple(args, "Oy", &arg_vol_c, &arg_path)) return NULL;
+    if(arg_vol_c == Py_None) arg_vol = NULL;
+    else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL))) return NULL;
+    if(hfs_stat(arg_vol, arg_path, &ret_ent)) return NULL;
+    return Py_BuildValue("y#", (char *)(&ret_ent), sizeof(ret_ent));
+}
+
+static PyObject *wrap_fstat(PyObject *self, PyObject *args)
+{
+    hfsfile *arg_file; PyObject *arg_file_c;
+    hfsdirent ret_ent;
+    if(!PyArg_ParseTuple(args, "O", &arg_file_c)) return NULL;
+    if(arg_file_c == Py_None) arg_file = NULL;
+    else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
+    if(hfs_fstat(arg_file, &ret_ent)) return NULL;
+    return Py_BuildValue("y#", (char *)(&ret_ent), sizeof(ret_ent));
+}
+
+static PyObject *wrap_setattr(PyObject *self, PyObject *args)
+{
+    hfsvol *arg_vol; PyObject *arg_vol_c; char *arg_path; hfsdirent *arg_ent; Py_ssize_t arg_ent_len;
+    if(!PyArg_ParseTuple(args, "Oyy#", &arg_vol_c, &arg_path, &arg_ent, &arg_ent_len)) return NULL;
+    if(arg_ent_len != sizeof(*arg_ent)) return NULL;
+    if(arg_vol_c == Py_None) arg_vol = NULL;
+    else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL))) return NULL;
+    if(hfs_setattr(arg_vol, arg_path, arg_ent)) return NULL;
+    return Py_None;
+}
+
+static PyObject *wrap_fsetattr(PyObject *self, PyObject *args)
+{
+    hfsfile *arg_file; PyObject *arg_file_c; hfsdirent *arg_ent; Py_ssize_t arg_ent_len;
+    if(!PyArg_ParseTuple(args, "Oy#", &arg_file_c, &arg_ent, &arg_ent_len)) return NULL;
+    if(arg_ent_len != sizeof(*arg_ent)) return NULL;
+    if(arg_file_c == Py_None) arg_file = NULL;
+    else if(!(arg_file = PyCapsule_GetPointer(arg_file_c, NAME_HFSFILE))) return NULL;
+    if(hfs_fsetattr(arg_file, arg_ent)) return NULL;
+    return Py_None;
+}
+
+static PyObject *wrap_mkdir(PyObject *self, PyObject *args)
+{
+    hfsvol *arg_vol; PyObject *arg_vol_c; char *arg_path;
+    if(!PyArg_ParseTuple(args, "Oy", &arg_vol_c, &arg_path)) return NULL;
+    if(arg_vol_c == Py_None) arg_vol = NULL;
+    else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL))) return NULL;
+    if(hfs_mkdir(arg_vol, arg_path)) return NULL;
+    return Py_None;
+}
+
+static PyObject *wrap_rmdir(PyObject *self, PyObject *args)
+{
+    hfsvol *arg_vol; PyObject *arg_vol_c; char *arg_path;
+    if(!PyArg_ParseTuple(args, "Oy", &arg_vol_c, &arg_path)) return NULL;
+    if(arg_vol_c == Py_None) arg_vol = NULL;
+    else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL))) return NULL;
+    if(hfs_rmdir(arg_vol, arg_path)) return NULL;
+    return Py_None;
+}
+
+static PyObject *wrap_delete(PyObject *self, PyObject *args)
+{
+    hfsvol *arg_vol; PyObject *arg_vol_c; char *arg_path;
+    if(!PyArg_ParseTuple(args, "Oy", &arg_vol_c, &arg_path)) return NULL;
+    if(arg_vol_c == Py_None) arg_vol = NULL;
+    else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL))) return NULL;
+    if(hfs_delete(arg_vol, arg_path)) return NULL;
+    return Py_None;
+}
+
+static PyObject *wrap_rename(PyObject *self, PyObject *args)
+{
+    hfsvol *arg_vol; PyObject *arg_vol_c; char *arg_srcpath; char *arg_dstpath;
+    if(!PyArg_ParseTuple(args, "Oy", &arg_vol_c, &arg_srcpath, &arg_dstpath)) return NULL;
+    if(arg_vol_c == Py_None) arg_vol = NULL;
+    else if(!(arg_vol = PyCapsule_GetPointer(arg_vol_c, NAME_HFSVOL))) return NULL;
+    if(hfs_rename(arg_vol, arg_srcpath, arg_dstpath)) return NULL;
+    return Py_None;
+}
+
+static PyObject *wrap_zero(PyObject *self, PyObject *args)
+{
+    char *arg_path; unsigned int arg_maxparts;
+    unsigned long ret_blocks;
+    if(!PyArg_ParseTuple(args, "sI", &arg_path, &arg_maxparts)) return NULL;
+    if(hfs_zero(arg_path, arg_maxparts, &ret_blocks)) return NULL;
+    return Py_BuildValue("k", ret_blocks);
+}
+
+static PyObject *wrap_mkpart(PyObject *self, PyObject *args)
+{
+    char *arg_path; unsigned long arg_len;
+    if(!PyArg_ParseTuple(args, "sk", &arg_path, &arg_len)) return NULL;
+    if(hfs_mkpart(arg_path, arg_len)) return NULL;
+    return Py_None;
+}
+
+static PyObject *wrap_nparts(PyObject *self, PyObject *args)
+{
+    char *arg_path;
+    int ret;
+    if(!PyArg_ParseTuple(args, "s", &arg_path)) return NULL;
+    ret = hfs_nparts(arg_path);
+    if(ret == -1) return NULL;
+    return Py_BuildValue("i", ret);
+}
+
+static PyObject *wrap_format(PyObject *self, PyObject *args) // bad blocks unimplemented
+{
+    char *arg_path; int arg_pnum; int arg_mode; char *arg_vname;
+    if(!PyArg_ParseTuple(args, "siiy", &arg_path, &arg_pnum, &arg_mode, &arg_vname)) return NULL;
+    if(hfs_format(arg_path, arg_pnum, arg_mode, arg_vname, 0, NULL)) return NULL;
+    return Py_None;
+}
 
 
 static PyMethodDef module_methods[] = {
@@ -294,19 +411,19 @@ static PyMethodDef module_methods[] = {
     {"seek", wrap_seek, METH_VARARGS, ""},
     {"close", wrap_close, METH_VARARGS, ""},
 // Catalog routines
-    // {"stat", wrap_stat, METH_VARARGS, ""},
-    // {"fstat", wrap_fstat, METH_VARARGS, ""},
-    // {"setattr", wrap_setattr, METH_VARARGS, ""},
-    // {"fsetattr", wrap_fsetattr, METH_VARARGS, ""},
-    // {"mkdir", wrap_mkdir, METH_VARARGS, ""},
-    // {"rmdir", wrap_rmdir, METH_VARARGS, ""},
-    // {"delete", wrap_delete, METH_VARARGS, ""},
-    // {"rename", wrap_rename, METH_VARARGS, ""},
+    {"stat", wrap_stat, METH_VARARGS, ""},
+    {"fstat", wrap_fstat, METH_VARARGS, ""},
+    {"setattr", wrap_setattr, METH_VARARGS, ""},
+    {"fsetattr", wrap_fsetattr, METH_VARARGS, ""},
+    {"mkdir", wrap_mkdir, METH_VARARGS, ""},
+    {"rmdir", wrap_rmdir, METH_VARARGS, ""},
+    {"delete", wrap_delete, METH_VARARGS, ""},
+    {"rename", wrap_rename, METH_VARARGS, ""},
 // Media routines
-    // {"zero", wrap_zero, METH_VARARGS, ""},
-    // {"mkpart", wrap_mkpart, METH_VARARGS, ""},
-    // {"nparts", wrap_nparts, METH_VARARGS, ""},
-    // {"format", wrap_format, METH_VARARGS, ""},
+    {"zero", wrap_zero, METH_VARARGS, ""},
+    {"mkpart", wrap_mkpart, METH_VARARGS, ""},
+    {"nparts", wrap_nparts, METH_VARARGS, ""},
+    {"format", wrap_format, METH_VARARGS, ""},
 
     {NULL, NULL, 0, NULL}
 };
