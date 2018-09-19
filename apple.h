@@ -19,6 +19,8 @@
  * $Id: apple.h,v 1.1 1998/04/11 08:27:11 rob Exp $
  */
 
+#pragma once
+
 typedef signed char	Char;
 typedef unsigned char	UChar;
 typedef signed char	SignedByte;

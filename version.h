@@ -19,6 +19,8 @@
  * $Id: version.h,v 1.6 1998/09/18 22:56:38 rob Exp $
  */
 
+#pragma once
+
 extern const char libhfs_rcsid[];
 
 extern const char libhfs_version[];

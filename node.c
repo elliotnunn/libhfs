@@ -19,10 +19,6 @@
  * $Id: node.c,v 1.9 1998/11/02 22:09:05 rob Exp $
  */
 
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
-
 # include <stdlib.h>
 # include <string.h>
 # include <errno.h>

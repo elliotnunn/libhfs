@@ -19,6 +19,8 @@
  * $Id: libhfs.h,v 1.7 1998/11/02 22:09:02 rob Exp $
  */
 
+#pragma once
+
 # include "hfs.h"
 # include "apple.h"
 

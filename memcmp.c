@@ -19,10 +19,6 @@
  * $Id: memcmp.c,v 1.6 1998/04/11 16:22:48 rob Exp $
  */
 
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
-
 # include <sys/types.h>
 
 /*

@@ -19,6 +19,8 @@
  * $Id: file.h,v 1.6 1998/04/11 08:27:12 rob Exp $
  */
 
+#pragma once
+
 enum {
   fkData = 0x00,
   fkRsrc = 0xff

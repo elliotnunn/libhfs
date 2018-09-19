@@ -19,10 +19,6 @@
  * $Id: hfs.c,v 1.15 1998/11/02 22:09:00 rob Exp $
  */
 
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
-
 # include <stdlib.h>
 # include <string.h>
 # include <time.h>
@@ -1535,11 +1531,11 @@ fail:
 }
 
 /*
- * NAME:	compare()
+ * NAME:	hcompare()
  * DESCRIPTION:	comparison function for qsort of blocks to be spared
  */
 static
-int compare(const unsigned int *n1, const unsigned int *n2)
+int hcompare(const unsigned int *n1, const unsigned int *n2)
 {
   return *n1 - *n2;
 }
@@ -1760,7 +1756,7 @@ int hfs_format(const char *path, int pnum, int mode, const char *vname,
       f_init(&bbfile, &vol, HFS_CNID_BADALLOC, "bad blocks");
 
       qsort(badalloc, nbadblocks, sizeof(*badalloc),
-	    (int (*)(const void *, const void *)) compare);
+	    (int (*)(const void *, const void *)) hcompare);
 
       for (i = 0; i < nbadblocks; ++i)
 	{

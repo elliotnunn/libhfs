@@ -19,6 +19,8 @@
  * $Id: volume.h,v 1.7 1998/11/02 22:09:12 rob Exp $
  */
 
+#pragma once
+
 void v_init(hfsvol *, int);
 
 int v_open(hfsvol *, const char *, int);

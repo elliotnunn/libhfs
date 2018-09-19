@@ -19,10 +19,6 @@
  * $Id: file.c,v 1.9 1998/11/02 22:08:59 rob Exp $
  */
 
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
-
 # include <string.h>
 # include <errno.h>
 

@@ -19,6 +19,8 @@
  * $Id: node.h,v 1.7 1998/11/02 22:09:06 rob Exp $
  */
 
+#pragma once
+
 void n_init(node *, btree *, int, int);
 
 int n_new(node *);

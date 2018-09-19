@@ -19,6 +19,8 @@
  * $Id: medium.h,v 1.3 1998/04/11 08:27:13 rob Exp $
  */
 
+#pragma once
+
 /*
  * Partition Types:
  *

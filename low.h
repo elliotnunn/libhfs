@@ -19,6 +19,8 @@
  * $Id: low.h,v 1.6 1998/04/11 08:27:13 rob Exp $
  */
 
+#pragma once
+
 # define HFS_DDR_SIGWORD	0x4552
 
 # define HFS_PM_SIGWORD		0x504d

@@ -19,10 +19,6 @@
  * $Id: low.c,v 1.8 1998/11/02 22:09:03 rob Exp $
  */
 
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
-
 # include <stdlib.h>
 # include <string.h>
 # include <errno.h>

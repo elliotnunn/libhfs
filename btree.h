@@ -19,6 +19,8 @@
  * $Id: btree.h,v 1.8 1998/11/02 22:08:55 rob Exp $
  */
 
+#pragma once
+
 int bt_getnode(node *, btree *, unsigned long);
 int bt_putnode(node *);
 

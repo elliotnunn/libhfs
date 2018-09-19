@@ -19,6 +19,8 @@
  * $Id: os.h,v 1.6 1998/09/15 19:21:05 rob Exp $
  */
 
+#pragma once
+
 int os_open(void **, const char *, int);
 int os_close(void **);
 

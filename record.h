@@ -19,6 +19,8 @@
  * $Id: record.h,v 1.7 1998/11/02 22:09:08 rob Exp $
  */
 
+#pragma once
+
 void r_packcatkey(const CatKeyRec *, byte *, unsigned int *);
 void r_unpackcatkey(const byte *, CatKeyRec *);
 

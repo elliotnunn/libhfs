@@ -19,10 +19,6 @@
  * $Id: btree.c,v 1.10 1998/11/02 22:08:54 rob Exp $
  */
 
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
-
 # include <stdlib.h>
 # include <string.h>
 # include <errno.h>

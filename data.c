@@ -19,10 +19,6 @@
  * $Id: data.c,v 1.7 1998/11/02 22:08:57 rob Exp $
  */
 
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
-
 # include <string.h>
 # include <time.h>
 

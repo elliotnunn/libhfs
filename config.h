@@ -21,6 +21,8 @@
  * $Id: acconfig.h,v 1.5 1998/04/11 08:27:11 rob Exp $
  */
 
+#pragma once
+
 /*****************************************************************************
  * Definitions selected automatically by `configure'                         *
  *****************************************************************************/
@@ -32,7 +34,7 @@
 /* #undef size_t */
 
 /* Define if you have the ANSI C header files.  */
-#define STDC_HEADERS 1
+//#define STDC_HEADERS 1
 
 /* Define if your <sys/time.h> declares struct tm.  */
 /* #undef TM_IN_SYS_TIME */

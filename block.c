@@ -19,10 +19,6 @@
  * $Id: block.c,v 1.11 1998/11/02 22:08:52 rob Exp $
  */
 
-# ifdef HAVE_CONFIG_H
-#  include "config.h"
-# endif
-
 # include <stdlib.h>
 # include <string.h>
 # include <errno.h>
@@ -267,11 +263,11 @@ fail:
 }
 
 /*
- * NAME:	compare()
+ * NAME:	bcompare()
  * DESCRIPTION:	comparison function for qsort of cache bucket pointers
  */
 static
-int compare(const bucket **b1, const bucket **b2)
+int bcompare(const bucket **b1, const bucket **b2)
 {
   long diff;
 
@@ -297,7 +293,7 @@ int dobuckets(hfsvol *vol, bucket **chain, unsigned int len,
   int result = 0;
 
   qsort(chain, len, sizeof(*chain),
-	(int (*)(const void *, const void *)) compare);
+	(int (*)(const void *, const void *)) bcompare);
 
   for (i = 0; i < len; i += count)
     {

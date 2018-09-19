@@ -19,6 +19,8 @@
  * $Id: block.h,v 1.10 1998/11/02 22:08:53 rob Exp $
  */
 
+#pragma once
+
 int b_init(hfsvol *);
 int b_flush(hfsvol *);
 int b_finish(hfsvol *);

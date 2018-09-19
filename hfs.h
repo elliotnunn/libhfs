@@ -19,6 +19,8 @@
  * $Id: hfs.h,v 1.11 1998/11/02 22:09:01 rob Exp $
  */
 
+#pragma once
+
 # include <time.h>
 
 # define HFS_BLOCKSZ		512
