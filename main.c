@@ -75,6 +75,7 @@ static PyObject *wrap_getvol(PyObject *self, PyObject *args)
     char *arg_vol;
     if(!PyArg_ParseTuple(args, "y", &arg_vol))
         {PyErr_SetString(PyExc_ValueError, "bad args"); return NULL;}
+    if(!arg_vol[0]) arg_vol = NULL;
     hfsvol *ret = hfs_getvol(arg_vol);
     if(!ret)
         {PyErr_SetString(PyExc_ValueError, GETERR); return NULL;}
@@ -196,8 +197,10 @@ static PyObject *wrap_readdir(PyObject *self, PyObject *args)
     if(arg_dir_c == Py_None) arg_dir = NULL;
     else if(!(arg_dir = PyCapsule_GetPointer(arg_dir_c, NAME_HFSDIR)))
         {PyErr_SetString(PyExc_ValueError, "bad " NAME_HFSDIR); return NULL;}
-    if(hfs_readdir(arg_dir, &ret_ent))
-        {PyErr_SetString(PyExc_ValueError, GETERR); return NULL;}
+    if(hfs_readdir(arg_dir, &ret_ent)) {
+        if(errno == ENOENT) return Py_None;
+        PyErr_SetString(PyExc_ValueError, GETERR); return NULL;
+    }
     return Py_BuildValue("y#", (char *)(&ret_ent), sizeof(ret_ent));
 }
 
