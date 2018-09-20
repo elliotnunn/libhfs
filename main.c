@@ -22,7 +22,7 @@
 #define GETERR (hfs_error ? hfs_error : "unknown error")
 
 static const char doc_mount[] =
-    "hfsvol *hfs_mount(const char *path, int pnum, int flags);\n"
+    "mount(path, pnum, flags) -> hfsvol\n"
     "\n"
     "This routine attempts to open an HFS volume from a source pathname. The\n"
     "given `pnum' indicates which ordinal HFS partition is to be mounted,\n"
@@ -44,9 +44,8 @@ static const char doc_mount[] =
     "on which blocks may otherwise contain random data. Neither of these\n"
     "options should normally be necessary, and both may affect performance.\n"
     "\n"
-    "If an error occurs, this function returns NULL. Otherwise a pointer to a\n"
-    "volume structure is returned. This pointer is used to access the volume\n"
-    "and must eventually be passed to hfs_umount() to flush and close the\n"
+    "An hfsvol object is returned. This object is used to access the volume\n"
+    "and must eventually be passed to umount() to flush and close the\n"
     "volume and free all associated memory.";
 
 static PyObject *wrap_mount(PyObject *self, PyObject *args)
@@ -61,14 +60,12 @@ static PyObject *wrap_mount(PyObject *self, PyObject *args)
 }
 
 static const char doc_flush[] =
-    "int hfs_flush(hfsvol *vol);\n"
+    "flush(hfsvol)\n"
     "\n"
     "This routine causes all pending changes to be flushed to an HFS volume.\n"
     "If a volume is kept open for a long period of time, it would be wise\n"
     "to call this periodically to avoid corrupting the volume due to\n"
-    "unforeseen circumstances (power failure, floppy eject, etc.)\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "unforeseen circumstances (power failure, floppy eject, etc.).";
 
 static PyObject *wrap_flush(PyObject *self, PyObject *args)
 {
@@ -84,9 +81,9 @@ static PyObject *wrap_flush(PyObject *self, PyObject *args)
 }
 
 static const char doc_flushall[] =
-    "void hfs_flushall(void);\n"
+    "flushall()\n"
     "\n"
-    "This routine is similar to hfs_flush() except that all mounted volumes\n"
+    "This routine is similar to flush() except that all mounted volumes\n"
     "are flushed, and errors are not reported.";
 
 static PyObject *wrap_flushall(PyObject *self, PyObject *args)
@@ -96,18 +93,17 @@ static PyObject *wrap_flushall(PyObject *self, PyObject *args)
 }
 
 static const char doc_umount[] =
-    "int hfs_umount(hfsvol *vol);\n"
+    "umount(hfsvol)\n"
     "\n"
     "The specified HFS volume is unmounted; all open files and directories\n"
     "on the volume are closed, all pending changes to the volume are\n"
     "flushed, and all memory allocated for the volume is freed.\n"
     "\n"
-    "All volumes opened with hfs_mount() must eventually be closed with\n"
-    "hfs_umount(), or they will risk corruption.\n"
+    "All volumes opened mount() must eventually be closed with\n"
+    "umount(), or they will risk corruption.\n"
     "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.\n"
-    "In either case, the volume structure pointer will become invalid, as\n"
-    "will all pointers to open file or directory structures associated with\n"
+    "The hfsvol object will become invalid, as will all objects\n"
+    "representing open file or directory structures associated with\n"
     "the volume.";
 
 static PyObject *wrap_umount(PyObject *self, PyObject *args)
@@ -124,9 +120,9 @@ static PyObject *wrap_umount(PyObject *self, PyObject *args)
 }
 
 static const char doc_umountall[] =
-    "void hfs_umountall(void);\n"
+    "umountall()\n"
     "\n"
-    "This routine is similar to hfs_umount() except that all mounted volumes\n"
+    "This routine is similar to umount() except that all mounted volumes\n"
     "are closed, and errors are not reported.\n"
     "\n"
     "This routine may be useful to call just before a process terminates to\n"
@@ -139,16 +135,15 @@ static PyObject *wrap_umountall(PyObject *self, PyObject *args)
 }
 
 static const char doc_getvol[] =
-    "hfsvol *hfs_getvol(const char *name);\n"
+    "getvol(name_bytes) -> hfsvol\n"
     "\n"
     "This routines searches all mounted volumes for one having the given\n"
-    "`name', and returns its volume structure pointer. If more than one\n"
-    "volume have the same name, the most recently mounted one is returned. If\n"
-    "no volume matches the given name, a NULL pointer is returned.\n"
+    "`name_bytes', and returns its hfsvol object. If more than one\n"
+    "volume have the same name, the most recently mounted one is returned.\n"
     "\n"
     "The given `name' is assumed to be encoded using MacOS Standard Roman.\n"
     "\n"
-    "If a NULL pointer is passed to this routine, the current volume is\n"
+    "If an empty string is passed to this routine, the current volume is\n"
     "returned, if any.";
 
 static PyObject *wrap_getvol(PyObject *self, PyObject *args)
@@ -164,10 +159,10 @@ static PyObject *wrap_getvol(PyObject *self, PyObject *args)
 }
 
 static const char doc_setvol[] =
-    "void hfs_setvol(hfsvol *vol);\n"
+    "setvol(hfsvol)\n"
     "\n"
     "The routine changes the \"current\" volume. Most HFS routines will accept\n"
-    "a NULL volume pointer to mean the current volume; by default, the\n"
+    "a None hfsvol argument to mean the current volume; by default, the\n"
     "current volume is the last one which was mounted.";
 
 static PyObject *wrap_setvol(PyObject *self, PyObject *args)
@@ -183,14 +178,11 @@ static PyObject *wrap_setvol(PyObject *self, PyObject *args)
 }
 
 static const char doc_vstat[] =
-    "int hfs_vstat(hfsvol *vol, hfsvolent *ent);\n"
+    "vstat(hfsvol) -> ent\n"
     "\n"
-    "This routine fills the volume entity structure `*ent' with information\n"
+    "This routine returns a volume entity structure `ent' with information\n"
     "about a mounted volume. The fields of the structure are defined in\n"
-    "the hfs.h header file.\n"
-    "\n"
-    "This routine returns 0 unless a NULL pointer is passed for the volume\n"
-    "and no volume is current, in which case it returns -1.";
+    "the hfs.h header file.";
 
 static PyObject *wrap_vstat(PyObject *self, PyObject *args)
 {
@@ -207,7 +199,7 @@ static PyObject *wrap_vstat(PyObject *self, PyObject *args)
 }
 
 static const char doc_vsetattr[] =
-    "int hfs_vsetattr(hfsvol *vol, hfsvolent *ent);\n"
+    "vsetattr(hfsvol, ent)\n"
     "\n"
     "This routine allows some attributes of a volume to be changed. The\n"
     "attributes which may be changed are: ent->clumpsz, ent->crdate,\n"
@@ -216,9 +208,7 @@ static const char doc_vsetattr[] =
     "allocation block size, and the \"blessed\" folder must either be 0 or a\n"
     "valid folder CNID.\n"
     "\n"
-    "To change the volume's name, use hfs_rename().\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "To change the volume's name, use rename().";
 
 static PyObject *wrap_vsetattr(PyObject *self, PyObject *args) // problems
 {
@@ -236,14 +226,12 @@ static PyObject *wrap_vsetattr(PyObject *self, PyObject *args) // problems
 }
 
 static const char doc_chdir[] =
-    "int hfs_chdir(hfsvol *vol, const char *path);\n"
+    "chdir(hfsvol, path_bytes)\n"
     "\n"
     "The \"current working directory\" for the given volume is changed.\n"
-    "`path' can be either a relative or absolute HFS path.\n"
+    "`path_bytes' can be either a relative or absolute HFS path.\n"
     "\n"
-    "The given `path' is assumed to be encoded using MacOS Standard Roman.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "The given `path_bytes' is assumed to be encoded using MacOS Standard Roman.";
 
 static PyObject *wrap_chdir(PyObject *self, PyObject *args)
 {
@@ -259,11 +247,11 @@ static PyObject *wrap_chdir(PyObject *self, PyObject *args)
 }
 
 static const char doc_getcwd[] =
-    "long hfs_getcwd(hfsvol *vol);\n"
+    "getcwd(hfsvol) -> id\n"
     "\n"
     "The internal directory ID of the current working directory for the\n"
     "given volume is returned. This value is typically only useful for\n"
-    "passing to hfs_setcwd() or hfs_dirinfo().";
+    "passing to setcwd() or dirinfo().";
 
 static PyObject *wrap_getcwd(PyObject *self, PyObject *args)
 {
@@ -277,12 +265,10 @@ static PyObject *wrap_getcwd(PyObject *self, PyObject *args)
 }
 
 static const char doc_setcwd[] =
-    "int hfs_setcwd(hfsvol *vol, long id);\n"
+    "setcwd(hfsvol, id)\n"
     "\n"
     "This routine changes the current working directory for the given\n"
-    "volume. A directory must exist with the given id.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "volume. A directory must exist with the given id.";
 
 static PyObject *wrap_setcwd(PyObject *self, PyObject *args)
 {
@@ -298,16 +284,13 @@ static PyObject *wrap_setcwd(PyObject *self, PyObject *args)
 }
 
 static const char doc_dirinfo[] =
-    "int hfs_dirinfo(hfsvol *vol, long *id, char *name);\n"
+    "dirinfo(hfsvol, id) -> parent_id, name_bytes\n"
     "\n"
-    "This function looks up the given directory ID `*id' and stores in its\n"
-    "place the directory ID of its parent. If `name' is not NULL, the name\n"
-    "of the (child) directory is also stored in the buffer pointed to by it,\n"
-    "which must be at least HFS_MAX_FLEN + 1 (32) bytes long.\n"
+    "This function looks up the given directory ID `id' and returns\n"
+    "the directory ID of its parent. The name of the (child) directory\n"
+    "is also returned.\n"
     "\n"
     "The string `name' will be encoded using MacOS Standard Roman.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.\n"
     "\n"
     "This function can be called repeatedly to construct a full pathname\n"
     "to the current working directory. The root directory of a volume\n"
@@ -329,20 +312,18 @@ static PyObject *wrap_dirinfo(PyObject *self, PyObject *args) // returns name in
 }
 
 static const char doc_opendir[] =
-    "hfsdir *hfs_opendir(hfsvol *vol, const char *path);\n"
+    "opendir(hfsvol, path_bytes) -> hfsdir\n"
     "\n"
-    "This function prepares to read the contents of a directory. `path'\n"
+    "This function prepares to read the contents of a directory. `path_bytes'\n"
     "must be either an absolute or relative pathname to the desired HFS\n"
     "directory. As a special case, if `path' is an empty string, a\n"
     "\"meta-directory\" will be opened containing the root directories from\n"
     "all of the currently mounted volumes.\n"
     "\n"
-    "The string `path' is assumed to be encoded using MacOS Standard Roman.\n"
+    "The string `path_bytes' is assumed to be encoded using MacOS Standard Roman.\n"
     "\n"
-    "This function returns a pointer which must be passed to the other\n"
-    "directory-related routines to read the directory.\n"
-    "\n"
-    "If an error occurs, this function returns a NULL pointer.";
+    "This function returns an hfsdir object which must be passed to the other\n"
+    "directory-related routines to read the directory.";
 
 static PyObject *wrap_opendir(PyObject *self, PyObject *args)
 {
@@ -359,16 +340,13 @@ static PyObject *wrap_opendir(PyObject *self, PyObject *args)
 }
 
 static const char doc_readdir[] =
-    "int hfs_readdir(hfsdir *dir, hfsdirent *ent);\n"
+    "readdir(hfsdir) -> ent\n"
     "\n"
-    "This routine fills the directory entity structure `*ent' with\n"
+    "This routine fills returns a directory entity structure `ent' with\n"
     "information about the next item in the given open directory. The\n"
     "fields of the structure are defined in the hfs.h header file.\n"
     "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.\n"
-    "\n"
-    "When no more items occur in the directory, this function returns -1\n"
-    "and sets `errno' to ENOENT.";
+    "When no more items occur in the directory, this function returns None.";
 
 static PyObject *wrap_readdir(PyObject *self, PyObject *args)
 {
@@ -387,13 +365,12 @@ static PyObject *wrap_readdir(PyObject *self, PyObject *args)
 }
 
 static const char doc_closedir[] =
-    "int hfs_closedir(hfsdir *dir);\n"
+    "closedir(hfsdir)\n"
     "\n"
     "This function closes an open directory and frees all associated\n"
     "memory.\n"
     "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.\n"
-    "In either case, the directory structure pointer will no longer be valid.";
+    "The hfsdir object will no longer be valid.";
 
 static PyObject *wrap_closedir(PyObject *self, PyObject *args)
 {
@@ -409,19 +386,16 @@ static PyObject *wrap_closedir(PyObject *self, PyObject *args)
 }
 
 static const char doc_create[] =
-    "hfsfile *hfs_create(hfsvol *vol, const char *path,\n"
-    "                const char *type, const char *creator);\n"
+    "create(hfsvol, path_bytes, type_bytes, creator_bytes) -> hfsfile\n"
     "\n"
     "This routine creates a new, empty file with the given path, type, and\n"
     "creator. The type and creator must be strings of length 4, and have\n"
     "particular meaning under MacOS.\n"
     "\n"
-    "The given `path' is assumed to be encoded using MacOS Standard Roman.\n"
+    "The given `path_bytes' is assumed to be encoded using MacOS Standard Roman.\n"
     "\n"
-    "If the creation is successful, the file is opened and a pointer to a\n"
-    "file structure is returned, the same as if hfs_open() had been called.\n"
-    "\n"
-    "If an error occurs, this function returns a NULL pointer.";
+    "The created file is opened and an hfsfile object is returned, the\n"
+    "same as if open() had been called.";
 
 static PyObject *wrap_create(PyObject *self, PyObject *args)
 {
@@ -442,18 +416,16 @@ static PyObject *wrap_create(PyObject *self, PyObject *args)
 }
 
 static const char doc_open[] =
-    "hfsfile *hfs_open(hfsvol *vol, const char *path);\n"
+    "open(hfsvol, path_bytes) -> hfsfile\n"
     "\n"
     "This function opens an HFS file in preparation for I/O. Both forks of\n"
-    "the file may be manipulated once the file is opened; hfs_setfork() is\n"
+    "the file may be manipulated once the file is opened; setfork() is\n"
     "used to select the current fork. By default, the data fork is current.\n"
     "\n"
-    "The given `path' is assumed to be encoded using MacOS Standard Roman.\n"
+    "The given `path_bytes' is assumed to be encoded using MacOS Standard Roman.\n"
     "\n"
-    "A pointer to a file structure is returned. This pointer should be\n"
-    "passed to other routines to manipulate the file.\n"
-    "\n"
-    "If an error occurs, this function returns a NULL pointer.";
+    "An hfsfile object is returned. This should be passed to other routines\n"
+    "to manipulate the file.";
 
 static PyObject *wrap_open(PyObject *self, PyObject *args)
 {
@@ -470,7 +442,7 @@ static PyObject *wrap_open(PyObject *self, PyObject *args)
 }
 
 static const char doc_setfork[] =
-    "int hfs_setfork(hfsfile *file, int fork);\n"
+    "setfork(hfsfile, fork)\n"
     "\n"
     "This routine selects the current fork in an open file for I/O. HFS\n"
     "files have two forks, data and resource. Resource forks normally contain\n"
@@ -486,9 +458,7 @@ static const char doc_setfork[] =
     "As a side effect, this routine causes any excess disk blocks allocated\n"
     "for the fork which was current before the call to be freed; normally\n"
     "extra blocks are allocated during file writes to promote contiguity.\n"
-    "This routine will return -1 if an error occurs in this process;\n"
-    "otherwise it will return 0. The current fork will have been changed\n"
-    "regardless.";
+    "The current fork will have been changed regardless of any error.";
 
 static PyObject *wrap_setfork(PyObject *self, PyObject *args)
 {
@@ -504,7 +474,7 @@ static PyObject *wrap_setfork(PyObject *self, PyObject *args)
 }
 
 static const char doc_getfork[] =
-    "int hfs_getfork(hfsfile *file);\n"
+    "getfork(hfsfile) -> fork\n"
     "\n"
     "This routine returns an indication of which fork is currently active\n"
     "for I/O operations on the given file. If 0 is returned, the data fork\n"
@@ -523,15 +493,11 @@ static PyObject *wrap_getfork(PyObject *self, PyObject *args)
 }
 
 static const char doc_read[] =
-    "long hfs_read(hfsfile *file, void *ptr, unsigned long len);\n"
+    "read(hfsfile, bytearray)\n"
     "\n"
-    "This routine reads up to `len' bytes from the current fork of an HFS\n"
-    "file and places them into the buffer pointed to by `ptr' (which must be\n"
-    "at least `len' bytes long.) The number of bytes actually read is\n"
-    "returned, and may be less than `len' if the end of the file is reached.\n"
-    "\n"
-    "If this routine returns 0, there is no more data to be read from the\n"
-    "file. If an error occurs, this routine will return -1.\n"
+    "This routine tries to fill a bytearray with bytes from the current fork of an HFS\n"
+    "file. The bytearray will be shortened to fit the number of bytes actually read\n"
+    "if the end of the file is reached.\n"
     "\n"
     "It is most efficient to read data in multiples of HFS_BLOCKSZ byte\n"
     "blocks at a time.";
@@ -552,12 +518,10 @@ static PyObject *wrap_read(PyObject *self, PyObject *args) // pass in a bytearra
 }
 
 static const char doc_write[] =
-    "long hfs_write(hfsfile *file, const void *ptr, unsigned long len);\n"
+    "write(hfsfile, bytes) -> byteswritten\n"
     "\n"
-    "This routine writes up to `len' bytes of data to the current fork of an\n"
-    "HFS file from the buffer pointed to by `ptr'. The number of bytes\n"
-    "actually written is returned. If an error occurs, this routine will\n"
-    "return -1.\n"
+    "This routine writes `bytes' to the current fork of an HFS file.\n"
+    "The number of bytes actually written is returned.\n"
     "\n"
     "If the end of the file is reached before all bytes have been written,\n"
     "the file is automatically extended.\n"
@@ -580,16 +544,14 @@ static PyObject *wrap_write(PyObject *self, PyObject *args) // pass in a bytearr
 }
 
 static const char doc_truncate[] =
-    "int hfs_truncate(hfsfile *file, unsigned long len);\n"
+    "truncate(hfsfile, length)\n"
     "\n"
     "This routine causes the current fork of the specified open file to be\n"
-    "truncated to at most `len' bytes.\n"
+    "truncated to at most `length' bytes.\n"
     "\n"
     "The disk blocks associated with the freed portion of the file are not\n"
     "actually deallocated until either the current fork is changed or the\n"
-    "file is closed.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "file is closed.";
 
 static PyObject *wrap_truncate(PyObject *self, PyObject *args) // pass in a bytearray and get it shrunk!
 {
@@ -605,11 +567,11 @@ static PyObject *wrap_truncate(PyObject *self, PyObject *args) // pass in a byte
 }
 
 static const char doc_seek[] =
-    "long hfs_seek(hfsfile *file, long offset, int from);\n"
+    "seek(hfsfile, offset, from) -> location\n"
     "\n"
     "This routine changes the current seek pointer for the specified open\n"
-    "file. This pointer determines where the next call to hfs_read() or\n"
-    "hfs_write() will read or write data within the current fork.\n"
+    "file. This pointer determines where the next call to read() or\n"
+    "write() will read or write data within the current fork.\n"
     "\n"
     "If `from' is HFS_SEEK_SET, the pointer is set to the absolute position\n"
     "given by `offset'.\n"
@@ -624,8 +586,7 @@ static const char doc_seek[] =
     "It is not presently possible to set the seek pointer beyond the logical\n"
     "end of the file.\n"
     "\n"
-    "The new absolute position of the seek pointer is returned, unless an\n"
-    "invalid argument was specified, in which case -1 is returned.";
+    "The new absolute position of the seek pointer is returned.";
 
 static PyObject *wrap_seek(PyObject *self, PyObject *args) // pass in a bytearray and get it shrunk!
 {
@@ -642,15 +603,14 @@ static PyObject *wrap_seek(PyObject *self, PyObject *args) // pass in a bytearra
 }
 
 static const char doc_close[] =
-    "int hfs_close(hfsfile *file);\n"
+    "close(hfsfile)\n"
     "\n"
     "This routine causes all pending changes to the specified file to be\n"
     "flushed, and all storage associated with the file structure to be\n"
     "freed. Any excess disk blocks associated with the file are also\n"
     "deallocated at this time.\n"
     "\n"
-    "If an error occurs, this routine returns -1. Otherwise it returns 0.\n"
-    "In either case, the file structure pointer will no longer be valid.";
+    "The file structure pointer will no longer be valid.";
 
 static PyObject *wrap_close(PyObject *self, PyObject *args) // pass in a bytearray and get it shrunk!
 {
@@ -666,17 +626,14 @@ static PyObject *wrap_close(PyObject *self, PyObject *args) // pass in a bytearr
 }
 
 static const char doc_stat[] =
-    "int hfs_stat(hfsvol *vol, const char *path, hfsdirent *ent);\n"
+    "stat(hfsvol, path_bytes) -> ent\n"
     "\n"
-    "This routine fills the directory entity structure `*ent' with\n"
-    "information about the file or directory specified by `path' on the\n"
+    "This routine returns a directory entity structure `ent' with\n"
+    "information about the file or directory specified by `path_bytes' on the\n"
     "given volume. The fields of the structure are defined in the hfs.h\n"
     "header file.\n"
     "\n"
-    "The given `path' is assumed to be encoded using MacOS Standard Roman.\n"
-    "\n"
-    "If there is no such path, or if another error occurs, this routine\n"
-    "returns -1. Otherwise it returns 0.";
+    "The given `path_bytes' is assumed to be encoded using MacOS Standard Roman.";
 
 static PyObject *wrap_stat(PyObject *self, PyObject *args)
 {
@@ -693,12 +650,10 @@ static PyObject *wrap_stat(PyObject *self, PyObject *args)
 }
 
 static const char doc_fstat[] =
-    "int hfs_fstat(hfsfile *file, hfsdirent *ent);\n"
+    "fstat(hfsfile) -> ent\n"
     "\n"
-    "This routine is similar to hfs_stat() except it returns information\n"
-    "about a file that is already open.\n"
-    "\n"
-    "If an error occurs, this routine returns -1. Otherwise it returns 0.";
+    "This routine is similar to stat() except it returns information\n"
+    "about a file that is already open.";
 
 static PyObject *wrap_fstat(PyObject *self, PyObject *args)
 {
@@ -715,7 +670,7 @@ static PyObject *wrap_fstat(PyObject *self, PyObject *args)
 }
 
 static const char doc_setattr[] =
-    "int hfs_setattr(hfsvol *vol, const char *path, const hfsdirent *ent);\n"
+    "setattr(hfsvol, path_bytes, ent)\n"
     "\n"
     "This routine changes various attributes of an existing file or\n"
     "directory. The attributes which may be changed are: ent->crdate,\n"
@@ -723,9 +678,7 @@ static const char doc_setattr[] =
     "ent->u.file.type, ent->u.file.creator, and ent->u.dir.rect. Also, the\n"
     "locked status of a file may be changed with ent->flags & HFS_ISLOCKED.\n"
     "\n"
-    "The given `path' is assumed to be encoded using MacOS Standard Roman.\n"
-    "\n"
-    "If an error occurs, this routine returns -1. Otherwise it returns 0.";
+    "The given `path_bytes' is assumed to be encoded using MacOS Standard Roman.";
 
 static PyObject *wrap_setattr(PyObject *self, PyObject *args)
 {
@@ -743,12 +696,10 @@ static PyObject *wrap_setattr(PyObject *self, PyObject *args)
 }
 
 static const char doc_fsetattr[] =
-    "int hfs_fsetattr(hfsfile *file, const hfsdirent *ent);\n"
+    "fsetattr(hfsfile, ent)\n"
     "\n"
-    "This routine is similar to hfs_setattr() except it manipulates a file\n"
-    "that is already open.\n"
-    "\n"
-    "If an error occurs, this routine returns -1. Otherwise it returns 0.";
+    "This routine is similar to setattr() except it manipulates a file\n"
+    "that is already open.";
 
 static PyObject *wrap_fsetattr(PyObject *self, PyObject *args)
 {
@@ -766,15 +717,13 @@ static PyObject *wrap_fsetattr(PyObject *self, PyObject *args)
 }
 
 static const char doc_mkdir[] =
-    "int hfs_mkdir(hfsvol *vol, const char *path);\n"
+    "mkdir(hfsvol, path_bytes)\n"
     "\n"
-    "This routine creates a new, empty directory with the given path.\n"
+    "This routine creates a new, empty directory with the given path_bytes.\n"
     "All parent directories must already exist, but there must not already\n"
     "be a file or directory with the complete given path.\n"
     "\n"
-    "The given `path' is assumed to be encoded using MacOS Standard Roman.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "The given `path_bytes' is assumed to be encoded using MacOS Standard Roman.";
 
 static PyObject *wrap_mkdir(PyObject *self, PyObject *args)
 {
@@ -790,14 +739,12 @@ static PyObject *wrap_mkdir(PyObject *self, PyObject *args)
 }
 
 static const char doc_rmdir[] =
-    "int hfs_rmdir(hfsvol *vol, const char *path);\n"
+    "rmdir(hfsvol, path_bytes)\n"
     "\n"
     "This routine deletes the directory with the given path. The directory\n"
     "must be empty.\n"
     "\n"
-    "The given `path' is assumed to be encoded using MacOS Standard Roman.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "The given `pat_bytesh' is assumed to be encoded using MacOS Standard Roman.";
 
 static PyObject *wrap_rmdir(PyObject *self, PyObject *args)
 {
@@ -813,13 +760,11 @@ static PyObject *wrap_rmdir(PyObject *self, PyObject *args)
 }
 
 static const char doc_delete[] =
-    "int hfs_delete(hfsvol *vol, const char *path);\n"
+    "delete(hfsvol, path_bytes)\n"
     "\n"
     "This routine deletes both forks of the file with the given path.\n"
     "\n"
-    "The given `path' is assumed to be encoded using MacOS Standard Roman.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "The given `path_bytes' is assumed to be encoded using MacOS Standard Roman.";
 
 static PyObject *wrap_delete(PyObject *self, PyObject *args)
 {
@@ -835,22 +780,20 @@ static PyObject *wrap_delete(PyObject *self, PyObject *args)
 }
 
 static const char doc_rename[] =
-    "int hfs_rename(hfsvol *vol, const char *srcpath, const char *dstpath);\n"
+    "rename(hfsvol, srcpath_bytes, dstpath_bytes)\n"
     "\n"
-    "This routine moves and/or renames the given `srcpath' to `dstpath'.\n"
+    "This routine moves and/or renames the given `srcpath_bytes' to `dstpath_bytes'.\n"
     "The source must exist; the destination must not exist, unless it is a\n"
     "directory, in which case an attempt will be made to move the source\n"
     "into the destination directory without changing its name.\n"
     "\n"
-    "If both `srcpath' and `dstpath' refer to root directories, the volume\n"
-    "specified by `srcpath' will be renamed. Note that volume names may\n"
+    "If both `srcpath_bytes' and `dstpath_bytes' refer to root directories, the volume\n"
+    "specified by `srcpath_bytes' will be renamed. Note that volume names may\n"
     "only have 1-27 (HFS_MAX_VLEN) characters, while all other names may\n"
     "have 1-31 (HFS_MAX_FLEN) characters.\n"
     "\n"
-    "The given `srcpath' and `dstpath' are assumed to be encoded using MacOS\n"
-    "Standard Roman.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "The given `srcpath_bytes' and `dstpath_bytes' are assumed to be encoded using MacOS\n"
+    "Standard Roman.";
 
 static PyObject *wrap_rename(PyObject *self, PyObject *args)
 {
@@ -866,8 +809,7 @@ static PyObject *wrap_rename(PyObject *self, PyObject *args)
 }
 
 static const char doc_zero[] =
-    "int hfs_zero(const char *path, unsigned int maxparts,\n"
-    "         unsigned long *blocks);\n"
+    "zero(path, maxparts) -> blocks\n"
     "\n"
     "This routine initializes a medium with a new, empty driver descriptor\n"
     "record and partition map. This is only necessary if it is desired to\n"
@@ -878,7 +820,7 @@ static const char doc_zero[] =
     "The partition map will be empty, with the exception of an entry for the\n"
     "partition map itself, plus an entry for the rest of the medium as free\n"
     "space. To be useful, one or more HFS partitions should be created with\n"
-    "hfs_mkpart().\n"
+    "mkpart().\n"
     "\n"
     "The partition map will be created just large enough to allow `maxparts'\n"
     "individual partitions to be created, not counting the partitions created\n"
@@ -886,11 +828,8 @@ static const char doc_zero[] =
     "it may be impossible to create more than this many partitions for the\n"
     "lifetime of the medium without re-initializing.\n"
     "\n"
-    "If `blocks' is not NULL, the total number of blocks available for\n"
-    "partitioning (after the partition map structures have been created) will\n"
-    "be stored at this location.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "The total number of blocks available for partitioning (after the\n"
+    "partition map structures have been created) will be returned.";
 
 static PyObject *wrap_zero(PyObject *self, PyObject *args)
 {
@@ -904,9 +843,9 @@ static PyObject *wrap_zero(PyObject *self, PyObject *args)
 }
 
 static const char doc_mkpart[] =
-    "int hfs_mkpart(const char *path, unsigned long len);\n"
+    "mkpart(path, length)\n"
     "\n"
-    "This routine creates a new HFS partition having `len' blocks on the\n"
+    "This routine creates a new HFS partition having `length' blocks on the\n"
     "given medium. Space for the partition will be taken from the available\n"
     "free space as indicated in the existing partition map.\n"
     "\n"
@@ -914,9 +853,7 @@ static const char doc_mkpart[] =
     "not enough free contiguous blocks on the medium, or if there is only\n"
     "one slot left in the partition map and the request does not specify\n"
     "all the remaining blocks in the free space. (The partition map cannot\n"
-    "leave any blocks in the medium unaccounted for.)\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "leave any blocks in the medium unaccounted for.)";
 
 static PyObject *wrap_mkpart(PyObject *self, PyObject *args)
 {
@@ -929,7 +866,7 @@ static PyObject *wrap_mkpart(PyObject *self, PyObject *args)
 }
 
 static const char doc_nparts[] =
-    "int hfs_nparts(const char *path);\n"
+    "nparts(path) -> num\n"
     "\n"
     "This routine determines the number of HFS partitions present on the\n"
     "given medium, if any. If the medium specified by `path' is not\n"
@@ -940,9 +877,7 @@ static const char doc_nparts[] =
     "medium is partitioned, and if so, the allowable range of partition\n"
     "numbers which can be passed to the routines which require one. However,\n"
     "passing 0 as a partition number always refers to the entire medium,\n"
-    "ignoring all partitions.\n"
-    "\n"
-    "If an error occurs, this function returns -1.";
+    "ignoring all partitions.";
 
 static PyObject *wrap_nparts(PyObject *self, PyObject *args)
 {
@@ -957,8 +892,7 @@ static PyObject *wrap_nparts(PyObject *self, PyObject *args)
 }
 
 static const char doc_format[] =
-    "int hfs_format(const char *path, int pnum, int mode, const char *vname,\n"
-    "           int nbadblocks, const unsigned long badblocks[]);\n"
+    "format(path, pnum, mode, vname_bytes)\n"
     "\n"
     "This routine writes a new HFS file system to the specified `path', which\n"
     "should be a block device or a writable file. The size of the volume is\n"
@@ -972,29 +906,28 @@ static const char doc_format[] =
     "device will be used for the new HFS volume.\n"
     "\n"
     "Volume options may be specified in the `mode' argument. In addition to\n"
-    "the options accepted by hfs_mount(), HFS_OPT_2048 may be specified to\n"
+    "the options accepted by mount(), HFS_OPT_2048 may be specified to\n"
     "request that the volume allocation blocks be aligned on physical\n"
     "2048-byte block boundaries. Such a constraint is necessary to support\n"
     "some hybrid CD-ROM file system formats, but is otherwise unnecessary and\n"
     "may result in fewer allocation blocks altogether.\n"
     "\n"
-    "The volume is given the name `vname', which must be between 1 and\n"
+    "The volume is given the name `vname_bytes', which must be between 1 and\n"
     "HFS_MAX_VLEN (27) characters in length inclusively, and cannot contain\n"
     "any colons (':'). This string is assumed to be encoded using MacOS\n"
     "Standard Roman.\n"
     "\n"
+    "UNIMPLEMENTED:\n"
     "It is possible to map out or \"spare\" bad blocks on the device such that\n"
     "the file system will be made aware of these blocks and will not attempt\n"
-    "to use them to store data. To perform this magic, hfs_format() may be\n"
+    "to use them to store data. To perform this magic, format() may be\n"
     "passed an array of block numbers to spare. These numbers must\n"
     "correspond to logical 512-byte blocks on the device and should be\n"
     "relative to the beginning of the volume's partition, if any. If no\n"
     "blocks need to be spared, 0 should be passed for `nbadblocks', and\n"
     "`badblocks' may be a NULL pointer. Note that an error can occur if a\n"
     "bad block occurs in a critical disk structure, or if there are too\n"
-    "many bad blocks (more than 25%) in the volume.\n"
-    "\n"
-    "If an error occurs, this function returns -1. Otherwise it returns 0.";
+    "many bad blocks (more than 25%) in the volume.";
 
 static PyObject *wrap_format(PyObject *self, PyObject *args) // bad blocks unimplemented
 {
